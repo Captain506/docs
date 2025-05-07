@@ -1,0 +1,38 @@
+#!/bin/bash
+# Setting up SSH for GitHub with enhanced security and automation
+
+echo "Starting SSH setup for GitHub..."
+
+# Generate an Ed25519 key if not already present
+SSH_KEY="$HOME/.ssh/id_ed25519"
+if [ ! -f "$SSH_KEY" ]; then
+    echo "Generating a new Ed25519 SSH key..."
+    ssh-keygen -t ed25519 -C "your_email@example.com" -f "$SSH_KEY" -N ""
+fi
+
+# Start the SSH agent
+eval "$(ssh-agent -s)"
+
+# Add the SSH key to the agent
+ssh-add "$SSH_KEY"
+
+# Create an optimized SSH config file
+SSH_CONFIG="$HOME/.ssh/config"
+if [ ! -f "$SSH_CONFIG" ]; then
+    echo "Configuring SSH settings..."
+    cat <<EOL > "$SSH_CONFIG"
+Host github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    ServerAliveInterval 60
+EOL
+fi
+
+echo "Your SSH key has been generated and added."
+
+# Display public key for adding to GitHub
+echo "Copy this SSH key and add it to GitHub:"
+cat "$SSH_KEY.pub"
+
+echo "To test your connection, run: ssh -T git@github.com"
+echo "Setup complete!"
